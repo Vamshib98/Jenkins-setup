@@ -1,1 +1,26 @@
-Welcome to jenkins
+#!/bin/bash
+
+echo "🔧 Starting Jenkins service..."
+
+# Check if Jenkins is installed
+if ! systemctl list-unit-files | grep -q jenkins.service; then
+  echo "❌ Jenkins is not installed or not registered as a service."
+  exit 1
+fi
+
+# Reset failed state (optional but useful)
+sudo systemctl reset-failed jenkins
+
+# Start Jenkins
+sudo systemctl start jenkins
+
+# Check service status
+if systemctl is-active --quiet jenkins; then
+  echo "✅ Jenkins started successfully!"
+else
+  echo "❌ Failed to start Jenkins. Fetching logs..."
+  sudo systemctl status jenkins --no-pager
+  echo -e "\n📝 Recent logs:"
+  sudo journalctl -xeu jenkins.service --no-pager | tail -n 30
+  exit 1
+fi
